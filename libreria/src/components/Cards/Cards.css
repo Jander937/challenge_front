@@ -1,0 +1,15 @@
+#lucho{
+    background-color: black;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-self: baseline;
+
+}
+#jander{
+    display: grid;
+}
+#crear{
+    align-self: baseline;
+    align-items: center;
+}
