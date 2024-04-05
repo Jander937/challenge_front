@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import DeleteButton from '../DeleteButton/DeleteButton'; // Make sure this path is correct
-import EditBookRow from "../EditBookRow/EditBookRow"; // Make sure this path is correct
-import SearchBooks from '../SearchBooks/SearchBooks'; // Make sure this path is correct
-import './Cards.css'; // Adjust the path according to your file structure
+import EditBookRow from "../EditBookRow/EditBookRow"; // Make sure this path is correct // Adjust the path according to your file structure
+import CreateBookButton from '../CreateBookButton/CreateBookButton';
+import SearchBooks from '../SearchBooks/SearchBooks';
+import './Cards.css'; 
 
-function Prueba() {
+function Cards() {
     const [bookData, setBookData] = useState([]);
     const [editingBook, setEditingBook] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +17,25 @@ function Prueba() {
     }, []);
 
     const handleUpdateBook = async (book) => {
-        // ... existing logic for updating a book
+        try {
+            const response = await fetch(`http://localhost:8080/api/v5/book/${book.id_book}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(book),
+            });
+
+            if (response.ok) {
+                console.log('Libro actualizado con éxito');
+                setBookData(bookData.map(b => b.id_book === book.id_book ? book : b));
+                setEditingBook(null); // Exit editing mode
+            } else {
+                console.error('Error al actualizar el libro:', await response.text());
+            }
+        } catch (error) {
+            console.error('Error al actualizar el libro:', error);
+        }
     };
 
     const cancelEdit = () => {
@@ -35,6 +54,9 @@ function Prueba() {
             console.error('Error al obtener los libros:', error);
         }
     };
+    const handleBookCreated = () => {
+        fetchData(); // Fetch the updated book list after a new book is created
+    };
 
     const onDeletionSuccess = (id_book) => {
         setBookData(bookData.filter(book => book.id_book !== id_book));
@@ -45,15 +67,19 @@ function Prueba() {
     };
 
     const filteredBooks = searchTerm
-        ? bookData.filter(book =>
-            book.title.toLowerCase().includes(searchTerm) ||
-            book.isbn.toLowerCase().includes(searchTerm) ||
-            book.publication_year.toString().toLowerCase().includes(searchTerm)
-          )
-        : bookData;
+    ? bookData.filter(book =>
+        book.title.toLowerCase().includes(searchTerm) ||
+        book.isbn.toLowerCase().includes(searchTerm) ||
+        book.publication_year.toString().toLowerCase().includes(searchTerm)
+      )
+    : bookData;
+
 
     return (
+    
         <div id="lucho">
+            
+            <CreateBookButton onBookCreated={handleBookCreated} />
             <SearchBooks onSearch={handleSearch} />
             {filteredBooks.map((book) => {
                 if (editingBook && book.id_book === editingBook.id_book) {
@@ -81,8 +107,10 @@ function Prueba() {
                     );
                 }
             })}
+            
         </div>
+        
     );
 }
 
-export default Prueba;
+export default Cards;
